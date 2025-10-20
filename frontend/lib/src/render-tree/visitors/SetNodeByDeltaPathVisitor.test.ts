@@ -35,13 +35,6 @@ describe("SetNodeByDeltaPathVisitor", () => {
       )
       expect(visitor).toBeDefined()
     })
-
-    it("throws error when deltaPath is empty", () => {
-      const nodeToSet = text("new")
-      expect(
-        () => new SetNodeByDeltaPathVisitor([], nodeToSet, "test_run_id")
-      ).toThrow("deltaPath cannot be empty")
-    })
   })
 
   describe("visitElementNode", () => {
@@ -57,6 +50,18 @@ describe("SetNodeByDeltaPathVisitor", () => {
       expect(() => visitor.visitElementNode(elementNode)).toThrow(
         "'SetNodeByDeltaPathVisitor' cannot visit an ElementNode"
       )
+    })
+
+    it("returns itself when the delta path is empty", () => {
+      const elementNode = text("element")
+      const nodeToSet = text("new")
+      const visitor = new SetNodeByDeltaPathVisitor(
+        [],
+        nodeToSet,
+        "test_run_id"
+      )
+
+      expect(visitor.visitElementNode(elementNode)).toBe(nodeToSet)
     })
   })
 
