@@ -388,6 +388,32 @@ export const CustomMediaTag: FC<
   return <Tag {...attributes} />
 }
 
+interface CustomHelpIconProps {
+  children?: string
+}
+
+/**
+ * Custom component to render inline help icons in markdown.
+ * Wraps InlineTooltipIcon in an inline-block span for proper inline flow.
+ */
+export const CustomHelpIcon: FC<CustomHelpIconProps> = ({ children }) => {
+  // Ensure we only pass strings to the tooltip. Text directives should always
+  // pass plain strings, but we check defensively at runtime.
+  const tooltipContent = typeof children === "string" ? children : ""
+
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        verticalAlign: "middle",
+        transform: "translateY(-0.1em)",
+      }}
+    >
+      <InlineTooltipIcon content={tooltipContent} />
+    </span>
+  )
+}
+
 // These are common renderers that don't depend on props or context
 const BASE_RENDERERS = {
   pre: CustomPreTag,
@@ -401,6 +427,7 @@ const BASE_RENDERERS = {
   img: CustomMediaTag,
   video: CustomMediaTag,
   audio: CustomMediaTag,
+  "streamlit-help-icon": CustomHelpIcon,
 }
 
 /**
@@ -463,6 +490,15 @@ function createRemarkColoringAndSmall(
   return () => (tree: any) => {
     visit(tree, "textDirective", (node, _index, _parent) => {
       const nodeName = String(node.name)
+
+      // Handle help icon directive (:help[tooltip content])
+      if (nodeName === "help") {
+        const data = node.data || (node.data = {})
+        data.hName = "streamlit-help-icon"
+        data.hProperties = data.hProperties || {}
+        // Pass the children through so CustomHelpIcon can extract the content
+        return
+      }
 
       // Handle small text directive (:small[])
       if (nodeName === "small") {
